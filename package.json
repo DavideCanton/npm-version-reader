@@ -1,22 +1,24 @@
 {
-  "name": "npm-version-reader",
-  "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/DavideCanton/npm-version-reader.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/DavideCanton/npm-version-reader/issues"
-  },
-  "homepage": "https://github.com/DavideCanton/npm-version-reader#readme",
-  "dependencies": {
-    "npm": "^6.14.9"
-  }
+    "name": "npm-version-reader",
+    "version": "0.0.1",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "debug": "node ./index.js at-json",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/DavideCanton/npm-version-reader.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/DavideCanton/npm-version-reader/issues"
+    },
+    "homepage": "https://github.com/DavideCanton/npm-version-reader#readme",
+    "dependencies": {
+        "npm": "^6.14.9",
+        "rimraf": "^3.0.2"
+    }
 }
