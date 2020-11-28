@@ -4,7 +4,7 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "debug": "node ./index.js at-json",
+        "debug": "node ./index.js at-json -m",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "repository": {
@@ -19,6 +19,11 @@
     "homepage": "https://github.com/DavideCanton/npm-version-reader#readme",
     "dependencies": {
         "npm": "^6.14.9",
-        "rimraf": "^3.0.2"
+        "rimraf": "^3.0.2",
+        "tmp": "^0.2.1",
+        "yargs": "^16.1.1"
+    },
+    "devDependencies": {
+        "@types/yargs": "^15.0.10"
     }
 }
