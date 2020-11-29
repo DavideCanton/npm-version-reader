@@ -42,8 +42,7 @@ const argv = yargs(hideBin(process.argv))
             default: 'https://registry.npmjs.org',
             description: 'NPM registry to query.',
         },
-    })
-    .
+    })    
     .help().argv;
 
 async function main(args) {
