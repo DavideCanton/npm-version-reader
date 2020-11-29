@@ -1,40 +1,22 @@
-const { execSync } = require("child_process");
-const path = require("path");
 const semver = require("semver");
-const tmp = require("tmp");
-const {
-  execAndRead,
-  readDependencies,
-  checkoutTag,
-  exportVersions,
-} = require("./utils");
-const { promisify } = require("util");
 const yargs = require("yargs/yargs");
 const { hideBin } = require("yargs/helpers");
-
-const sleep = promisify(setTimeout);
-
-const srcDir = ".";
-const tmpDir = tmp.dirSync({ unsafeCleanup: true });
-const out_file = path.join(srcDir, "out.json");
+const fetch = require("node-fetch");
+const _ = require("lodash");
 
 const argv = yargs(hideBin(process.argv))
-  .command(
-    "$0",
-    "the default command",
-    (yargs) => {
-      yargs.positional("package", {
-        describe: "package name",
-        type: "string",
-      });
-    }
-  )
+  .command("$0", "the default command", (yargs) => {
+    yargs.positional("package", {
+      describe: "package name",
+      type: "string",
+    });
+  })
   .options({
-    count: {
-      alias: "c",
-      type: "number",
-      default: 0,
-      description: "Number of tags",
+    range: {
+      alias: "r",
+      type: "string",
+      default: "",
+      description: "Semver range",
     },
     onlyMajor: {
       alias: "m",
@@ -42,68 +24,54 @@ const argv = yargs(hideBin(process.argv))
       default: false,
       description: "Inspect only major",
     },
-    tagPattern: {
-      alias: "p",
-      type: "string",
-      default: "^v.+$",
-      description: "Tag pattern",
+    onlyStable: {
+      alias: "s",
+      type: "boolean",
+      default: false,
+      description: "Inspect only stable",
     },
   })
   .help().argv;
 
 async function main(args) {
   const [package] = args._;
-  const { count, tagPattern, onlyMajor } = args;
+  const { onlyMajor, onlyStable, range } = args;
 
-  console.info("Retrieving repository url...");
-  const input = `npm view ${package} repository.url`;
-  let repository = execAndRead(input);
-  repository = repository.replace(/^git\+/, "");
-  if (!repository) throw new Error("Can't retrieve repository URL");
+  const { versions, time } = await fetch(
+    `https://registry.npmjs.org/${package}`
+  ).then((v) => v.json());
 
-  console.info("Cloning repository...");
-  execSync(
-    `git clone --quiet --no-checkout ${repository} --depth 1 ${tmpDir.name}`
-  );
+  Object.keys(time).forEach((k) => (time[k] = new Date(time[k])));
 
-  console.info("Reading tags...");
-  execSync("git fetch --tags --quiet", { cwd: tmpDir.name });
+  let allVersions = _.chain(Object.keys(versions)).orderBy((v) => time[v], [
+    "desc",
+  ]);
 
-  //TODO sort better
-  let tags = execAndRead("git tag --list --sort=-committerdate", {
-    cwd: tmpDir.name,
-  })
-    .split("\n")
-    .filter((t) => !!t.match(tagPattern))
-    .filter((t, i, a) => {
-      if (onlyMajor && i > 0) {
-        const m = semver.parse(t).major;
-        const m2 = semver.parse(a[i - 1]).major;
-        return m !== m2;
-      }
-      return true;
-    })
-    .map((s) => s.trim());
+  if (range)
+    allVersions = allVersions.filter((v) => semver.satisfies(v, range));
 
-  if (count > 0) tags = tags.slice(0, count);
+  if (onlyStable)
+    allVersions = allVersions.filter((v) => !semver.prerelease(v));
 
-  const versions = {};
-  for (const tag of tags) {
-    console.info(`Reading dependencies of tag ${tag}...`);
-    checkoutTag(tmpDir.name, tag);
-    readDependencies(tmpDir.name, versions, tag);
-    await sleep(1000);
+  if (onlyMajor) {
+    allVersions = allVersions
+      .groupBy((v) => semver.major(v))
+      .mapValues((vv) => vv[0])
+      .values();
   }
 
-  console.info("Writing out file...");
-  exportVersions(versions, out_file);
+  allVersions = allVersions.value();
 
-  console.info("Cleaning up...");
-  try {
-    tmpDir.removeCallback();
-  } catch (e) {
-    console.warn("Can't delete temp folder: " + e);
+  const out = {};
+  for (const version of allVersions) {
+    out[version] = _.pick(versions[version], [
+      "dependencies",
+      "devDependencies",
+      "peerDependencies",
+    ]);
   }
+
+  console.log(out);
 }
 
 main(argv);
