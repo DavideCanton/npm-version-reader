@@ -1,0 +1,13 @@
+env:
+    browser: true
+    commonjs: true
+    es2021: true
+extends:
+    - google
+parserOptions:
+    ecmaVersion: 12
+rules:
+    max-len: 1
+    indent: ['error', 4]
+    require-jsdoc: 0
+    curly: 0
