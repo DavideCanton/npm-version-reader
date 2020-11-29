@@ -2,7 +2,6 @@
     "name": "npm-version-reader",
     "version": "0.0.1",
     "description": "",
-    "main": "index.js",
     "scripts": {
         "debug": "node ./index.js at-json -m",
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,6 +12,7 @@
     },
     "author": "",
     "license": "ISC",
+    "bin": "./index.js",
     "bugs": {
         "url": "https://github.com/DavideCanton/npm-version-reader/issues"
     },

@@ -43,6 +43,7 @@ const argv = yargs(hideBin(process.argv))
             description: 'NPM registry to query.',
         },
     })
+    .
     .help().argv;
 
 async function main(args) {
