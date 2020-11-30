@@ -1,6 +1,6 @@
 {
     "name": "npm-version-reader",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "",
     "scripts": {
         "debug": "node ./index.js at-json -m",
