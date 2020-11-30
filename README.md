@@ -19,7 +19,7 @@ The only positional argument (and the only required one) is the package name.
 | :-------- | :------ | :----------
 | -m, --onlyMajor | false | Inspect only the latest version for each major.
 | -s, --onlyStable | false | Inspect only stable versions (no alpha, beta, prereleases).
-| --registry | https://registry.npmjs.org | Registry to query
+| --registry | | Registry to query. Leave empty to use current registry set in NPM config.
 | -r, --range | | Semver range to retrieve.
 
 ## Versioning
