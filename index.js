@@ -9,7 +9,7 @@ const _ = require('lodash');
 
 const argv = yargs(hideBin(process.argv))
     .command(
-        '$0',
+        '$0 <package>',
         'Queries the provided registry and returns all the dependencies for each version.',
         (yargs) =>
         {
@@ -45,12 +45,13 @@ const argv = yargs(hideBin(process.argv))
             description: 'Registry to query. Leave empty to use current registry set in NPM config.',
         },
     })
+    .strict()
+    .demandCommand(1)
     .help().argv;
 
 async function main(args)
 {
-    const [package] = args._;
-    let { registry, onlyMajor, onlyStable, range } = args;
+    let { registry, onlyMajor, onlyStable, range, package } = args;
 
     if (!registry)
         registry = execSync('npm config get registry').toString('utf-8').trim();
