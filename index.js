@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const {execSync} = require('child_process');
 const semver = require('semver');
 const yargs = require('yargs/yargs');
-const { hideBin } = require('yargs/helpers');
+const {hideBin} = require('yargs/helpers');
 const fetch = require('node-fetch');
 const _ = require('lodash');
 
@@ -11,8 +11,7 @@ const argv = yargs(hideBin(process.argv))
     .command(
         '$0 <package>',
         'Queries the provided registry and returns all the dependencies for each version.',
-        (yargs) =>
-        {
+        (yargs) => {
             yargs.positional('package', {
                 describe: 'package identifier',
                 type: 'string',
@@ -42,22 +41,22 @@ const argv = yargs(hideBin(process.argv))
         registry: {
             type: 'string',
             default: '',
-            description: 'Registry to query. Leave empty to use current registry set in NPM config.',
+            description:
+                'Registry to query. Leave empty to use current registry set in NPM config.',
         },
     })
     .strict()
     .demandCommand(1)
     .help().argv;
 
-async function main(args)
-{
-    let { registry, onlyMajor, onlyStable, range, package } = args;
+async function main(args) {
+    let {registry, onlyMajor, onlyStable, range, package} = args;
 
     if (!registry)
         registry = execSync('npm config get registry').toString('utf-8').trim();
     console.log(`Using registry ${registry}...`);
 
-    const { versions, time } = await fetch(`${registry}/${package}`).then((v) =>
+    const {versions, time} = await fetch(`${registry}/${package}`).then((v) =>
         v.json(),
     );
 
@@ -73,8 +72,7 @@ async function main(args)
     if (onlyStable)
         allVersions = allVersions.filter((v) => !semver.prerelease(v));
 
-    if (onlyMajor)
-    {
+    if (onlyMajor) {
         allVersions = allVersions
             .groupBy((v) => semver.major(v))
             .mapValues((vv) => vv[0])
@@ -84,8 +82,7 @@ async function main(args)
     allVersions = allVersions.value();
 
     const out = {};
-    for (const version of allVersions)
-    {
+    for (const version of allVersions) {
         out[version] = _.pick(versions[version], [
             'dependencies',
             'devDependencies',
