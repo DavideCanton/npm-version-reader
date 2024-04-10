@@ -2,9 +2,7 @@
     "name": "npm-version-reader",
     "version": "0.0.6",
     "description": "",
-    "scripts": {
-        "debug": "node ./index.cjs -m"
-    },
+    "scripts": {},
     "repository": {
         "type": "git",
         "url": "git+https://github.com/DavideCanton/npm-version-reader.git"
@@ -17,7 +15,6 @@
     },
     "homepage": "https://github.com/DavideCanton/npm-version-reader#readme",
     "dependencies": {
-        "lodash": "^4.17.21",
         "node-fetch": "^2.7.0",
         "semver": "7.6.0",
         "yargs": "^17.7.2"

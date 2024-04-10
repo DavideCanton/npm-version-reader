@@ -3,18 +3,12 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [        
+    "configurations": [
         {
-            "name": "Launch via NPM",
+            "name": "Launch",
             "request": "launch",
-            "runtimeArgs": [
-                "run-script",
-                "debug"
-            ],
-            "runtimeExecutable": "npm",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "runtimeArgs": [".", "@angular/core", "-m", "-s"],
+            "skipFiles": ["<node_internals>/**"],
             "type": "node"
         }
     ]

@@ -6,7 +6,6 @@ const semver = require('semver');
 const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
 const fetch = require('node-fetch');
-const _ = require('lodash');
 const {promisify} = require('util');
 
 const argv = yargs(hideBin(process.argv))
@@ -69,35 +68,53 @@ const argv = yargs(hideBin(process.argv))
         v.json(),
     );
 
-    Object.keys(time).forEach((k) => (time[k] = new Date(time[k])));
+    let allVersions = [];
+    for (const v in versions) {
+        allVersions.push({
+            version: v,
+            time: new Date(time[v]),
+        });
+    }
 
-    let allVersions = _.chain(Object.keys(versions)).orderBy(
-        (v) => time[v],
-        ['desc'],
-    );
+    // sort desc
+    allVersions.sort((v1, v2) => v2['time'].valueOf() - v1['time'].valueOf());
 
     if (range) {
-        allVersions = allVersions.filter((v) => semver.satisfies(v, range));
+        allVersions = allVersions.filter(({version}) =>
+            semver.satisfies(version, range),
+        );
     }
 
     if (stable) {
-        allVersions = allVersions.filter((v) => !semver.prerelease(v));
+        allVersions = allVersions.filter(
+            ({version}) => !semver.prerelease(version),
+        );
     }
 
     if (major) {
-        allVersions = allVersions
-            .groupBy((v) => semver.major(v))
-            .mapValues((vv) => vv[0])
-            .values();
+        const majors = new Set();
+        const latestVersions = [];
+        for (const versionObj of allVersions) {
+            const major = semver.major(versionObj.version);
+            if (!majors.has(major)) {
+                majors.add(major);
+                latestVersions.push(versionObj);
+            }
+        }
+        allVersions = latestVersions;
     }
 
     const out = {};
-    for (const version of allVersions.value()) {
-        out[version] = _.pick(versions[version], [
-            'dependencies',
-            'devDependencies',
-            'peerDependencies',
-        ]);
+    const keys = ['dependencies', 'devDependencies', 'peerDependencies'];
+
+    for (const {version} of allVersions) {
+        out[version] = {};
+        for (const k of keys) {
+            const src = versions[version][k];
+            if (src) {
+                out[version][k] = src;
+            }
+        }
     }
 
     console.log(out);
