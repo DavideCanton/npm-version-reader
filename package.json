@@ -3,8 +3,7 @@
     "version": "0.0.6",
     "description": "",
     "scripts": {
-        "debug": "node ./index.js at-json -m",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "debug": "node ./index.cjs -m"
     },
     "repository": {
         "type": "git",
