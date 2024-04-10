@@ -1,18 +1,20 @@
 #!/usr/bin/env node
+// @ts-check
 
-const {execSync} = require('child_process');
+const {exec} = require('child_process');
 const semver = require('semver');
 const yargs = require('yargs/yargs');
 const {hideBin} = require('yargs/helpers');
 const fetch = require('node-fetch');
 const _ = require('lodash');
+const {promisify} = require('util');
 
 const argv = yargs(hideBin(process.argv))
     .command(
-        '$0 <package>',
+        '$0 <pkg>',
         'Queries the provided registry and returns all the dependencies for each version.',
         (yargs) => {
-            yargs.positional('package', {
+            yargs.positional('pkg', {
                 describe: 'package identifier',
                 type: 'string',
             });
@@ -25,13 +27,13 @@ const argv = yargs(hideBin(process.argv))
             default: '',
             description: 'Semver range to retrieve.',
         },
-        onlyMajor: {
+        major: {
             alias: 'm',
             type: 'boolean',
             default: false,
             description: 'Inspect only the latest version for each major.',
         },
-        onlyStable: {
+        stable: {
             alias: 's',
             type: 'boolean',
             default: false,
@@ -47,42 +49,50 @@ const argv = yargs(hideBin(process.argv))
     })
     .strict()
     .demandCommand(1)
-    .help().argv;
+    .help()
+    .parseSync();
 
-async function main(args) {
-    let {registry, onlyMajor, onlyStable, range, package} = args;
+(async () => {
+    let {registry, major, stable, range, pkg} = argv;
 
-    if (!registry)
-        registry = execSync('npm config get registry').toString('utf-8').trim();
+    if (!registry) {
+        registry = (
+            await promisify(exec)('npm config get registry', {
+                encoding: 'utf-8',
+            })
+        ).stdout.trim();
+    }
+
     console.log(`Using registry ${registry}...`);
 
-    const {versions, time} = await fetch(`${registry}/${package}`).then((v) =>
+    const {versions, time} = await fetch(`${registry}/${pkg}`).then((v) =>
         v.json(),
     );
 
     Object.keys(time).forEach((k) => (time[k] = new Date(time[k])));
 
-    let allVersions = _.chain(Object.keys(versions)).orderBy((v) => time[v], [
-        'desc',
-    ]);
+    let allVersions = _.chain(Object.keys(versions)).orderBy(
+        (v) => time[v],
+        ['desc'],
+    );
 
-    if (range)
+    if (range) {
         allVersions = allVersions.filter((v) => semver.satisfies(v, range));
+    }
 
-    if (onlyStable)
+    if (stable) {
         allVersions = allVersions.filter((v) => !semver.prerelease(v));
+    }
 
-    if (onlyMajor) {
+    if (major) {
         allVersions = allVersions
             .groupBy((v) => semver.major(v))
             .mapValues((vv) => vv[0])
             .values();
     }
 
-    allVersions = allVersions.value();
-
     const out = {};
-    for (const version of allVersions) {
+    for (const version of allVersions.value()) {
         out[version] = _.pick(versions[version], [
             'dependencies',
             'devDependencies',
@@ -91,6 +101,4 @@ async function main(args) {
     }
 
     console.log(out);
-}
-
-main(argv);
+})();

@@ -15,12 +15,12 @@ npm install -g npm-version-reader
 The only positional argument (and the only required one) is the package name.
 
 ### Optional arguments
-| Parameter | Default | Description
-| :-------- | :------ | :----------
-| -m, --onlyMajor | false | Inspect only the latest version for each major.
-| -s, --onlyStable | false | Inspect only stable versions (no alpha, beta, prereleases).
-| --registry | | Registry to query. Leave empty to use current registry set in NPM config.
-| -r, --range | | Semver range to retrieve.
+| Parameter        | Default | Description                                                               |
+| :--------------- | :------ | :------------------------------------------------------------------------ |
+| `-m`, `--major`  | `false` | Inspect only the latest version for each major.                           |
+| `-s`, `--stable` | `false` | Inspect only stable versions (no alpha, beta, prereleases).               |
+| `--registry`     |         | Registry to query. Leave empty to use current registry set in NPM config. |
+| `-r`, `--range`  |         | Semver range to retrieve.                                                 |
 
 ## Versioning
 
